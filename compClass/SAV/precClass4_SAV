@@ -1,0 +1,93 @@
+classdef precClass4 < handle 
+
+ properties
+     nC
+     r
+     PRE1
+     PRE2
+     B
+     coefs1
+     coefs2
+ end
+
+methods
+
+    function prec = precClass4(B, nC, r) 
+%%  function prec = precClass4(B, nC, r) 
+%%-------------------- CONSTRUCTOR --------------------
+%% construct preconditoner class. 
+    n = size(B);
+    %%non-Hermitian case               
+    %%-------- Get rational approximation to 1/z outside circle                 
+    %% 1/z \approx \sum omega(k)/(sigma(k)+c\sigma(k)^2)
+    %% *(1/(1/sigma(k)+c-z))    
+    %%-------------------- left circle
+    [z1, om1] = contQuad(nC,2);
+    sigma1 = z1/r;
+    omega1 = om1/r;
+    c1 = -max(real(z1))*r-1;
+    %% first projector
+    coefs1 = -omega1 ./(sigma1 + c1*sigma1.*sigma1);
+    shift = 1./sigma1 + c1;
+
+    coefs1 = [coefs1 conj(coefs1)];
+    shift = [shift, conj(shift)];
+    %% second projector
+    shift2 = c1+z1*r; 
+    shift2 = [shift2, conj(shift2)];
+    
+        %%         coefs2 = om2*r2 ; %%./ shift2;
+        %%coefs2 = -om2*r2 ./ shift2;
+
+    coefs2 = om1*r;
+    coefs2 = [coefs2 conj(coefs2)];
+    prec.coefs1 = coefs1;
+    prec.coefs2 = coefs2;
+
+    %%-------------------- tye of precon.
+    if (1)
+        opts.type = 'crout';
+        opts.milu = 'off';
+        opts.droptol = 0.01;
+    else
+        opts.type = 'ilutp';
+        opts.droptol = 0.001;
+    end
+    tic;
+    %%-------------------- 
+    %%parfor k = 1:2*(nC+nC1)
+    for k = 1:2*nC  
+        %%if (isreal(B) & k>nC)
+        if (0) 
+            k1 = k-nC;
+            Lk = conj(PRE1(k1).Lk);  
+            Uk = conj(PRE1(k1).Uk);
+        else
+            fprintf(1,'factorize the %dth shifted matrix\n',k);
+            [Lk, Uk] = ilu(B-speye(n)*shift(k),opts);
+        end
+        PRE1(k) = struct('Lk',Lk,'Uk',Uk) ;
+    end 
+    for k = 1:2*nC  
+        %%if (isreal(B) & k>nC)
+        if (0) 
+            k1 = k-nC;
+            Lk = conj(PRE2(k1).Lk);  
+            Uk = conj(PRE2(k1).Uk);
+        else
+            fprintf(1,'factorize the %dth shifted matrix\n',k);
+            [Lk, Uk] = ilu(B-speye(n)*shift2(k),opts);
+        end
+        PRE2(k) = struct('Lk',Lk,'Uk',Uk) ;
+    end 
+
+     t2 = toc;
+     fprintf(1,'factorize time is %f\n',t2);
+     %%-------------------- data for subspace preconditioning
+     prec.nC = nC;
+     prec.PRE1 = PRE1;
+     prec.PRE2 = PRE2;
+     prec.B = B;
+  end
+ end
+end

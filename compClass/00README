@@ -1,0 +1,131 @@
+
+to test inner-outer gmres: prec4_6 with method == 0
+to test standard ILU prec4_3 with method == 0 
+
+to test ILU-free methods with one circle prec4_3
+to test ILU-free methods with many circle prec4_4
+
+
+
+rational function preconditioners 
+----------------------------------
+
+MAIN: 
+
+Classes 4_0  4_3 4_4 and 4_6
+==================== 
+
+In  each  case,  there  is   a  setup  function  precClass4_x  and  an
+ application ratPrec4_x Only  one driver testPrec4.m is  needed to run
+ both classes.  In addition each class has many different options that
+ can be set in the parameters ITopts.outer [outer method or method for
+ solving the (I-P)A\inv part] and ITopts.inner [ineer method or method
+ for solving the P A\inv part]... for explanations regarding these see 
+ the comments in the methods referenced.. 
+
+
+
+-----------------------------------------------------------------------
+ This the first preconditioner [cauchy integra with ILUs]
+
+ precClass4_0      = class for preconditioner 4_0... 
+                     This is what was used in the paper
+		     adapted from earlier code by Yuanzhe 
+		     some changes -- in particular the coeff 1/2
+                     is now lumped into the the `om' values retured by
+		     contQuad
+
+ ratPrec4_0 preconditioning operation associated with Class4 precon
+            this calls fgmrez_dr2 which in turn calls the preconditioner
+	    ratPrecD3_c
+
+ ratPrecD3_c.m	= preconditioner for the residual problem (A P x = b) 
+           
+-----------------------------------------------------------------------
+
+ This is the second preconditioner [cauchy integrals with fom and gmres without
+             ILU and with ILU for some methods]
+                               
+
+ precClass4_3      = class for preconditioner 4_3... 
+                     This is what was used in the paper
+		     adapted from earlier code by Yuanzhe 
+		     some changes -- in particular the coeff 1/2
+                     is now lumped into the the `om' values retured by
+		     contQuad
+
+ ratPrec4_3 preconditioning operation associated with Class4 precon
+            this calls fgmrez_dr2 which in turn calls the preconditioner
+	    ratPrecD3_d
+
+ ratPrecD3_d.m	= preconditioner for the residual problem (A P x = b) 
+  
+ !! You can also test just the pure ILU precondiotioner [no cauchy integral]
+ by choosing ITopts.outer = 0;  For comparison purposes
+
+
+-----------------------------------------------------------------------
+
+-----------------------------------------------------------------------
+
+ This is the second preconditioner [cauchy integrals with fom and gmres without
+             ILU and with ILU for some methods]
+                               
+
+ precClass4_4      = class for preconditioner 4_4... 
+                     This is what was used in the paper
+		     adapted from earlier code by Yuanzhe 
+		     some changes -- But this uses no ILUs of any sort
+		     		     
+
+ ratPrec4_4 preconditioning operation associated with Class4 precon
+            this calls fgmrez_dr2 which in turn calls the preconditioner
+	    ratPrecD3_d
+
+ ratPrecD3_d.m	= preconditioner for the residual problem (A P x = b) 
+ 
+ !! You can also test just the pure ILU precondiotioner [no cauchy integral]
+ by choosing ITopts.outer = 0;  For comparison purposes
+
+
+-----------------------------------------------------------------------
+
+
+
+  fgmrez.m       = outer preconditioned fgmres. 
+
+  fgmrez_dr2.m   = (inner) complex flexible gmres with deflation.
+
+
+TEST Problems
+
+  testPrec4.m  --> sets and solves Laplacean and Helmholtz problem
+                   both pf the preconditioners above can be invoked.
+
+AUXILIARY
+========== 
+
+Plotting:
+ comph_c.m
+ compp2_c.m
+ compp_c.m
+ plotnodes_c.m
+ plotrational_c.m
+
+Rational function:
+ contQuad.m
+ gauss_jacobi.m 
+ fh_c.m
+ fp2_c.m
+ fp_c.m
+
+Generating problem and checking  
+ ExEigLap3.m counts eigenvalues of laplacean
+ fd3d.m generates laplacian
+ tridiag.m [used by fd3d] 
+
+Directories: 
+ Helmholtz : helmholtz problem
+
+
+
